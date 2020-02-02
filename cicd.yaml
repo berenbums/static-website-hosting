@@ -84,7 +84,7 @@ Resources:
                 Version: 1
                 Provider: GitHub
               OutputArtifacts:
-                - Name: Infrastructure
+                - Name: Infra
               Configuration:
                 Owner: !Ref GitHubUser
                 Repo: !Ref GitHubInfrastructureRepo
@@ -116,13 +116,13 @@ Resources:
                 Provider: CloudFormation
                 Version: 1
               InputArtifacts:
-                - Name: Infrastructure
+                - Name: Infra
               Configuration:
                 ActionMode: CREATE_UPDATE
                 RoleArn: !GetAtt [PipelineRole, Arn]
                 StackName: !Sub ${ProjectName}-infrastructure
                 Capabilities: CAPABILITY_IAM
-                TemplatePath: Template::infrastructure.yaml
+                TemplatePath: Infras::infrastructure.yaml
                 ParameterOverrides: !Sub |
                   {
                     "DomainName" : "${DomainName}"
