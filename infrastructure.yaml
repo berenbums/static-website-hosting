@@ -10,11 +10,7 @@ Parameters:
 
 Resources:
   # Create the buckets to contain the website HTML
-  WebsiteBucket1:
+  WebsiteBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub ${DomainName}
-  WebsiteBucket2:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Sub www.${DomainName}
