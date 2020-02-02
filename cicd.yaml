@@ -6,8 +6,11 @@ Parameters:
   GitHubPersonalAccessToken:
     Description: 'GitHub personal access token'
     Type: String
-  GitHubRepo:
-    Description: 'GitHub repository'
+  GitHubWebsiteRepo:
+    Description: 'GitHub website repository'
+    Type: String
+  GitHubInfrastructureRepo:
+    Description: 'GitHub infrastructure repository'
     Type: String
   GitHubUser:
     Description: 'GitHub user'
@@ -74,31 +77,46 @@ Resources:
       Stages:
         - Name: Source
           Actions:
-            - Name: CheckoutTemplate
+            - Name: CheckoutInfrastructure
               ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
                 Version: 1
                 Provider: GitHub
               OutputArtifacts:
-                - Name: Template
+                - Name: Infrastructure
               Configuration:
                 Owner: !Ref GitHubUser
-                Repo: !Ref GitHubRepo
+                Repo: !Ref GitHubInfrastructureRepo
+                Branch: master
+                PollForSourceChanges: true
+                OAuthToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
+              RunOrder: 1
+            - Name: CheckoutWebsite
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: Website
+              Configuration:
+                Owner: !Ref GitHubUser
+                Repo: !Ref GitHubWebsiteRepo
                 Branch: master
                 PollForSourceChanges: true
                 OAuthToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
               RunOrder: 1
         - Name: Deploy
           Actions:
-            - Name: CreateStack
+            - Name: UpdateInfrastructure
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
                 Version: 1
               InputArtifacts:
-                - Name: Template
+                - Name: Infrastructure
               Configuration:
                 ActionMode: CREATE_UPDATE
                 RoleArn: !GetAtt [PipelineRole, Arn]
@@ -110,3 +128,15 @@ Resources:
                     "DomainName" : "${DomainName}"
                   }
               RunOrder: 1
+            - Name: UpdateWebsite
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: 1
+              InputArtifacts:
+                - Name: Website
+              Configuration:
+                BucketName: !Sub ${DomainName}
+                Extract: true
+              RunOrder: 2
