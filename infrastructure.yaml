@@ -13,4 +13,4 @@ Resources:
   WebsiteBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub ${DomainName}-temp
+      BucketName: !Sub ${DomainName}
