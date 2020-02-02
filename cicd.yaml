@@ -122,7 +122,7 @@ Resources:
                 RoleArn: !GetAtt [PipelineRole, Arn]
                 StackName: !Sub ${ProjectName}-infrastructure
                 Capabilities: CAPABILITY_IAM
-                TemplatePath: Infras::infrastructure.yaml
+                TemplatePath: Infra::infrastructure.yaml
                 ParameterOverrides: !Sub |
                   {
                     "DomainName" : "${DomainName}"
