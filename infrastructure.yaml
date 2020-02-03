@@ -37,10 +37,6 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        CustomErrorResponses:
-        - ErrorCode: 403 # not found
-          ResponseCode: 404
-          ResponsePagePath: !Ref ErrorPagePath
         DefaultCacheBehavior:
           AllowedMethods:
           - GET
