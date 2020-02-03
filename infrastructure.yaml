@@ -18,7 +18,7 @@ Resources:
   ReadPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref S3Bucket
+      Bucket: !Ref WebsiteBucket
       PolicyDocument:
         Statement:
         - Action: s3:GetObject
@@ -64,7 +64,7 @@ Resources:
         Enabled: true
         HttpVersion: http2
         Origins:
-        - DomainName: !GetAtt S3Bucket.DomainName
+        - DomainName: !GetAtt WebsiteBucket.DomainName
           Id: s3origin
           S3OriginConfig:
             OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
