@@ -1,16 +1,71 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 
-Description: 'Static website hosting with S3'
+Description: Static website hosting with S3
 
 Parameters:
   DomainName:
     Description: ''
     Type: String
-    Default: 'example.com'
+    Default: example.com
 
 Resources:
   # Create the buckets to contain the website HTML
   WebsiteBucket:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${DomainName}
+
+  ReadPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+        - Action: s3:GetObject
+          Effect: Allow
+          Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
+          Principal:
+            CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref WebsiteBucket
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        CustomErrorResponses:
+        - ErrorCode: 403 # not found
+          ResponseCode: 404
+          ResponsePagePath: !Ref ErrorPagePath
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          CachedMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          Compress: true
+          DefaultTTL: 3600 # in seconds
+          ForwardedValues:
+            Cookies:
+              Forward: none
+            QueryString: false
+          MaxTTL: 86400 # in seconds
+          MinTTL: 60 # in seconds
+          TargetOriginId: s3origin
+          ViewerProtocolPolicy: allow-all
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+        - DomainName: !GetAtt S3Bucket.DomainName
+          Id: s3origin
+          S3OriginConfig:
+            OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+        PriceClass: PriceClass_100
