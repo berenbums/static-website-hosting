@@ -29,8 +29,8 @@ Resources:
         - Action: s3:PutObject
           Effect: Allow
           Resource: !Sub arn:aws:s3:::${DomainName}*
-            Principal:
-              Service: codepipeline.amazonaws.com
+          Principal:
+            Service: codepipeline.amazonaws.com
 
   CloudFrontOriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
