@@ -55,14 +55,22 @@ Resources:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
-                Action: "cloudformation:*"
-                Resource: "*"
+                Action:
+                - cloudformation:CreateStack
+                - cloudformation:DeleteStack
+                - cloudformation:DescribeStacks
+                - cloudformation:UpdateStack
+                - cloudformation:ValidateTemplate
+                Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-infrastructure/*
               - Effect: Allow
-                Action: "s3:*"
-                Resource: "*"
+                Action: s3:*
+                Resource: !Sub arn:aws:s3:::${DomainName}
               - Effect: Allow
-                Action: "cloudfront:CreateCloudFrontOriginAccessIdentity"
-                Resource: "*"
+                Action:
+                - cloudfront:GetCloudFrontOriginAccessIdentity
+                - cloudfront:CreateCloudFrontOriginAccessIdentity
+                - cloudfront:DeleteCloudFrontOriginAccessIdentity
+                Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:origin-access-identity/*
               - Effect: Allow
                 Action:
                   - iam:PassRole
