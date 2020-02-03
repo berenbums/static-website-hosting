@@ -32,25 +32,24 @@ Resources:
       Description: GitHub personal access token
       SecretString: !Sub '{"OAuthToken":"${GitHubPersonalAccessToken}"}'
 
-  PipelineArtifacts:
+  ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${ProjectName}-pipeline-artifacts
 
-  PipelineRole:
+  CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub ${ProjectName}-cicd-codepipeline
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
             Principal:
-              Service:
-                - codepipeline.amazonaws.com
-                - cloudformation.amazonaws.com
+              Service: codepipeline.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: CloudPipelinePolicy
+        - PolicyName: !Sub ${ProjectName}-cicd-codepipeline
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -64,16 +63,47 @@ Resources:
                 Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-infrastructure/*
               - Effect: Allow
                 Action: s3:*
-                Resource: !Sub arn:aws:s3:::${DomainName}
+                Resource:
+                - !Sub arn:aws:s3:::${ProjectName}-pipeline-artifacts*
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService:
+                    - cloudformation.amazonaws.com
+
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-cicd-cloudformation
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${ProjectName}-cicd-cloudformation
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource:
+                - !Sub arn:aws:s3:::${DomainName}*
               - Effect: Allow
                 Action:
                 - cloudfront:GetCloudFrontOriginAccessIdentity
                 - cloudfront:CreateCloudFrontOriginAccessIdentity
                 - cloudfront:DeleteCloudFrontOriginAccessIdentity
-                Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:origin-access-identity/*
-              - Effect: Allow
-                Action:
-                  - iam:PassRole
+                - cloudfront:GetCloudFrontOriginAccessIdentityConfig
+                - cloudfront:GetDistribution
+                - cloudfront:CreateDistribution
+                - cloudfront:DeleteDistribution
+                - cloudfront:TagResource
                 Resource: "*"
 
   Pipeline:
@@ -83,8 +113,8 @@ Resources:
       ArtifactStore:
         Type: S3
         Location:
-          Ref: PipelineArtifacts
-      RoleArn: !GetAtt [PipelineRole, Arn]
+          Ref: ArtifactBucket
+      RoleArn: !GetAtt [CodePipelineRole, Arn]
       Stages:
         - Name: Source
           Actions:
@@ -130,7 +160,7 @@ Resources:
                 - Name: Infra
               Configuration:
                 ActionMode: CREATE_UPDATE
-                RoleArn: !GetAtt [PipelineRole, Arn]
+                RoleArn: !GetAtt [CloudFormationRole, Arn]
                 StackName: !Sub ${ProjectName}-infrastructure
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: Infra::infrastructure.yaml
