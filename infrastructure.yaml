@@ -23,12 +23,12 @@ Resources:
         Statement:
         - Action: s3:GetObject
           Effect: Allow
-          Resource: !Sub arn:aws:s3:::${DomainName}*
+          Resource: !Sub arn:aws:s3:::${DomainName}/*
           Principal:
             CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
         - Action: s3:PutObject
           Effect: Allow
-          Resource: !Sub arn:aws:s3:::${DomainName}*
+          Resource: !Sub arn:aws:s3:::${DomainName}/*
           Principal:
             Service: codepipeline.amazonaws.com
 
