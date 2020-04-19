@@ -163,7 +163,7 @@ Resources:
                 Owner: !Ref GitHubUser
                 Repo: !Ref GitHubRepo
                 Branch: master
-                PollForSourceChanges: true
+                PollForSourceChanges: false
                 OAuthToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
               RunOrder: 1
         - Name: Deploy
@@ -180,3 +180,18 @@ Resources:
                 BucketName: !Sub ${DomainName}
                 Extract: true
               RunOrder: 1
+
+  Webhook:
+    Type: "AWS::CodePipeline::Webhook"
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
+      Filters:
+        - JsonPath: $.ref
+          MatchEquals: "refs/heads/{Branch}"
+      TargetPipeline: !Ref Pipeline
+      TargetAction: CheckoutWebsite
+      Name: !Sub ${ProjectName}-pipeline-webhook
+      TargetPipelineVersion: !GetAtt Pipeline.Version
+      RegisterWithThirdParty: true              
