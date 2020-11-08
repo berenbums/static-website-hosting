@@ -1,30 +1,30 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 
-Description: 'CI/CD for the static website hosting infrastructure'
+Description: CI/CD for the static website hosting infrastructure
 
 Parameters:
   GitHubPersonalAccessToken:
-    Description: 'GitHub personal access token'
+    Description: GitHub personal access token
     Type: String
   GitHubRepo:
-    Description: 'GitHub website repository'
+    Description: GitHub website repository
     Type: String
   GitHubUser:
-    Description: 'GitHub user'
+    Description: GitHub user
     Type: String
   ProjectName:
-    Description: 'Project name'
+    Description: Project name
     Type: String
     Default: example-com
   DomainName:
-    Description: 'Domain name'
+    Description: Domain name
     Type: String
     Default: example.com
   CertificateArn:
-    Description: 'The ARN of the certificate stored in ACM'
+    Description: The ARN of the certificate stored in ACM
     Type: String
   HostedZoneId:
-    Description: 'The ID of the hosted zone in Route 53'
+    Description: The ID of the hosted zone in Route 53
     Type: String
 
 Resources:
@@ -54,11 +54,11 @@ Resources:
                 - !Sub arn:aws:s3:::${DomainName}/*
 
   Secret:
-    Type: 'AWS::SecretsManager::Secret'
+    Type: AWS::SecretsManager::Secret
     Properties:
       Name: GitHubPersonalAccessToken
       Description: GitHub personal access token
-      SecretString: !Sub '{"OAuthToken":"${GitHubPersonalAccessToken}"}'
+      SecretString: !Sub {"OAuthToken":"${GitHubPersonalAccessToken}"}
 
   WebsiteBucket:
     Type: AWS::S3::Bucket
@@ -164,7 +164,7 @@ Resources:
                 Repo: !Ref GitHubRepo
                 Branch: master
                 PollForSourceChanges: false
-                OAuthToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
+                OAuthToken: {{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}
               RunOrder: 1
         - Name: Deploy
           Actions:
@@ -186,7 +186,7 @@ Resources:
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken: '{{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}'
+        SecretToken: {{resolve:secretsmanager:GitHubPersonalAccessToken:SecretString:OAuthToken}}
       Filters:
         - JsonPath: $.ref
           MatchEquals: "refs/heads/{Branch}"
