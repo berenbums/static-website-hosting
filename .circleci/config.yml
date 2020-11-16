@@ -3,15 +3,7 @@ version: 2.1
 orbs:
   cfn-lint: fatlama/cfn-lint@0.2.2
 
-jobs:
-  validate-template:
-    executor: cfn-lint/default
-    steps:
-      - checkout
-      - run:
-         command: cfn-lint/lint --templates cf-template.yaml
-
 workflows:
   main:
     jobs:
-      - validate-template
+      - cfn-lint/lint --templates cf-template.yaml
