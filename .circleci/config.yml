@@ -1,19 +1,10 @@
 version: 2.1
 
 orbs:
-  cfn-lint: fatlama/cfn-lint@0.2.2
-
-jobs:
-  validate-template:
-    executor: cfn-lint/default
-    steps:
-      - checkout
-      - run:
-         command: ls -la
-      - run:
-         command: cfn-lint/lint --templates ./cf-template.yaml
+  cloudformation: frameio/cloudformation@0.15.0
 
 workflows:
-  main:
+  publish:
     jobs:
-      - validate-template
+      - cloudformation/lint:
+          template: cf-template.yaml
