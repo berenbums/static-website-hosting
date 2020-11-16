@@ -10,6 +10,8 @@ jobs:
       - checkout
       - run:
          command: ls -la
+      - run:
+         command: cfn-lint/lint --templates ./cf-template.yaml
 
 workflows:
   main:
