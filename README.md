@@ -1,6 +1,6 @@
 # Static website S3/CodePipeline project
 
-[![CircleCi](https://circleci.com/gh/berenbums/static-website-s3-codepipeline-cloudformation.svg?style=shield](https://circleci.com/gh/berenbums/static-website-s3-codepipeline-cloudformation)
+[![CircleCI](https://circleci.com/gh/berenbums/static-website-s3-codepipeline-cloudformation.svg?style=shield)](https://app.circleci.com/pipelines/github/berenbums/static-website-s3-codepipeline-cloudformation)
 
 ## Description
 CloudFormation template to host a static website on Amazon S3/CloudFront and create a CodePipeline for continuous deployment.
