@@ -1,7 +1,6 @@
 # Static website S3/CodePipeline project 
 ## Description
 CloudFormation template to host a static website on Amazon S3/CloudFront and create a CodePipeline for continuous deployment.
-
 The following AWS resources will be created:
 - S3 bucket for storing files
 - CloudFront distribution
